@@ -1,0 +1,68 @@
+[Unit]
+Description=LLaMA.cpp Server - Ornith 1.5 35B A3B Uncensored Q8_0 (Docker / gfx1103 ROCm)
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/llama.cpp-rocm-780m
+
+# Start: launch the llama-ornith container with the same params as the
+# host /etc/systemd/system/llama-ornith.service unit, but using the
+# llama.cpp-rocm-780m:7.13 Docker image (native gfx1103 ROCm backend,
+# no HSA_OVERRIDE_GFX_VERSION). The init-ornith.sh script is the source
+# of truth for the args — keep them in sync if you change one.
+ExecStartPre=-/usr/bin/docker rm -f llama-ornith
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name llama-ornith \
+    --device /dev/dri \
+    --group-add 992 \
+    --group-add 44 \
+    --security-opt seccomp=unconfined \
+    --cap-add SYS_PTRACE \
+    --shm-size 8g \
+    -v /opt/models:/models:ro \
+    -v /opt/search:/opt/search:ro \
+    -v /opt/node20:/opt/node20:ro \
+    -e HSA_ENABLE_SDMA=0 \
+    -e HSA_USE_SVM=0 \
+    -e GGML_HIP_GRAPHS=0 \
+    -p 8083:8080 \
+    llama.cpp-rocm-780m:7.13 \
+        --model /models/Ornith-1.5-35B-A3B-Uncensored-Q8_0.gguf \
+        --alias Ornith-1.5-35B-A3B-Uncensored \
+        --mmproj /models/mmproj-Ornith-1.5-35B-A3B-Uncensored-f16.gguf \
+        --n-gpu-layers 99 \
+        --ctx-size 524288 \
+        -n -1 \
+        --rope-scaling yarn \
+        --yarn-orig-ctx 262144 \
+        --rope-freq-scale 2.0 \
+        --override-kv qwen35moe.context_length=int:524288 \
+        --cache-type-k q8_0 \
+        --cache-type-v q8_0 \
+        --cache-ram 0 \
+        --parallel 1 \
+        --no-warmup \
+        --flash-attn on \
+        --agent \
+        --mcp-servers-config /opt/search/mcp-servers.json \
+        --jinja \
+        -b 256 \
+        --keep -1 \
+        --host 0.0.0.0 \
+        --port 8080 \
+        --image-min-tokens 1024 \
+        --cors-origins "*"
+ExecStop=/usr/bin/docker stop llama-ornith
+ExecStopPost=-/usr/bin/docker rm -f llama-ornith
+Restart=no
+RestartSec=10
+LimitNOFILE=65536
+TimeoutStartSec=600
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
