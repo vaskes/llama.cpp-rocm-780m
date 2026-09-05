@@ -28,7 +28,7 @@
 set -e
 
 CONTAINER_NAME="llama-ornith"
-IMAGE="llama.cpp-rocm-780m:7.13"
+IMAGE="llama.cpp-rocm-780m:7.13-therock"
 HOST_PORT="${LLAMA_ORNITH_HOST_PORT:-8080}"
 CONTAINER_PORT=8080
 
