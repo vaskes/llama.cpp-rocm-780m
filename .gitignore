@@ -27,7 +27,6 @@ build/llama-config*
 build/license.cpp
 build/Release
 build/llama-bench
-build/wheels/
 
 # Logs and runtime data
 logs/
@@ -54,3 +53,4 @@ Thumbs.db
 
 # Probe / temporary files
 probe*.Dockerfile
+build/therock-wheels/

@@ -23,7 +23,7 @@
 # Host port:      8080  (same as Qwen — they never run at the same time.
 #                          Override with LLAMA_ORNITH_HOST_PORT if needed.)
 # Container port: 8080
-# GPU:            /dev/dri only (NOT /dev/kfd — see OPERATIONS.md)
+# GPU:            /dev/kfd + /dev/dri + GID 992 (render), 44 (video)
 
 set -e
 
@@ -126,6 +126,7 @@ do_start() {
     docker run -d \
         --name "${CONTAINER_NAME}" \
         --restart=no \
+        --device /dev/kfd \
         --device /dev/dri \
         --group-add 992 \
         --group-add 44 \

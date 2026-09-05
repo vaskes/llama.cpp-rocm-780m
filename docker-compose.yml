@@ -37,6 +37,7 @@ services:
       - /opt/models:/models:ro
       - /opt/llama.cpp-rocm-780m/logs:/var/log/llama-server
     devices:
+      - /dev/kfd
       - /dev/dri
     group_add:
       - "44"   # video (gid)
@@ -47,7 +48,7 @@ services:
       - SYS_PTRACE
     shm_size: 8g
     environment:
-      # gfx1103-friendly env (no HSA_OVERRIDE needed — native build)
+
       - HSA_ENABLE_SDMA=0
       - HSA_USE_SVM=0
     # Override command to point at the actual model.
