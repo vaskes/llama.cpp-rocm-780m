@@ -1,0 +1,9 @@
+# What to exclude from the docker build context
+build/
+.git/
+.gitignore
+.dockerignore
+*.md
+!README.md
+!OPERATIONS.md
+logs/

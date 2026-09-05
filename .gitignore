@@ -1,0 +1,56 @@
+# Build artefacts (CMake cache, buildx context). The Dockerfile itself IS committed.
+build/build
+build/CMake*
+build/compile_commands.json
+build/cmake_install.cmake
+build/Makefile
+build/CTestTestfile.cmake
+build/DartConfiguration.tcl
+build/Testing
+build/CMakeCache.txt
+build/CMakeFiles
+build/cmake-build-*
+build/Dockerfile.d
+build/_deps
+build/*.cmake
+build/Testing
+build/src
+build/tools
+build/examples
+build/ggml
+build/common
+build/tests
+build/pocs
+build/vendor
+build/llama.pc
+build/llama-config*
+build/license.cpp
+build/Release
+build/llama-bench
+build/wheels/
+
+# Logs and runtime data
+logs/
+*.log
+*.log.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Probe / temporary files
+probe*.Dockerfile

@@ -1,0 +1,81 @@
+# Docker Compose for llama.cpp ROCm/gfx1103 production deployment
+#
+# Usage:
+#   docker compose up -d                   # start
+#   docker compose logs -f llama-server    # tail logs
+#   docker compose restart llama-server    # restart (e.g. after pulling a new GGUF)
+#   docker compose down                    # stop
+#
+# Models are expected under /opt/models on the host (the canonical
+# storage location for GGUF files on this server). Pass an alternative
+# path with `-f` or by editing this file.
+#
+# Persistent build cache: ./build on the host is bind-mounted to
+# /opt/build inside the container, so a `docker build` after pulling
+# new llama.cpp source only recompiles the changed files.
+#
+# The container runs as root for simplicity, but with the render/video
+# groups added so /dev/kfd and /dev/dri are accessible.
+
+services:
+  llama-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: llama.cpp-rocm-780m:7.13
+    container_name: llama-rocm
+    restart: unless-stopped
+    init: false
+    # Persist build cache: a new docker build (e.g. after `git pull`
+    # in /opt/llama.cpp) reuses the CMake configuration and only
+    # recompiles changed files.
+    volumes:
+      - ./build:/opt/build
+      - /opt/models:/models:ro
+      - /opt/llama.cpp-rocm-780m/logs:/var/log/llama-server
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - "44"   # video (gid)
+      - "992"  # render (gid, ROCm GPU access)
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_PTRACE
+    shm_size: 8g
+    environment:
+      # gfx1103-friendly env (no HSA_OVERRIDE needed — native build)
+      - HSA_ENABLE_SDMA=0
+      - HSA_USE_SVM=0
+    # Override command to point at the actual model.
+    # Examples:
+    #   --model /models/Qwen3.8-27B-Q4_K_M.gguf
+    #   --model /models/qwen2.5-7b-instruct-q4_k_m.gguf
+    #   --model /models/llama-3.1-8b-instruct-q4_k_m.gguf
+    command:
+      - --model
+      - /models/Qwen3.8-27B-Q4_K_M.gguf
+      - --alias
+      - Qwen3.8-27B-ROCm
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --ctx-size
+      - "32768"
+      - --n-gpu-layers
+      - "99"
+      - --cache-type-k
+      - q8_0
+      - --cache-type-v
+      - q8_0
+      - --flash-attn
+      - --jinja
+    ports:
+      - "8082:8080"   # 8082 to avoid conflict with dreamline RAG on 8081
+    healthcheck:
+      test: ["CMD", "/opt/llama.cpp/build/bin/llama-server", "--help"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
