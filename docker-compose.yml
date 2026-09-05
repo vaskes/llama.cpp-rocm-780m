@@ -24,7 +24,10 @@ services:
       dockerfile: Dockerfile
     image: llama.cpp-rocm-780m:7.13
     container_name: llama-rocm
-    restart: unless-stopped
+    # Manual control: do NOT restart on host reboot or container crash.
+    # Start explicitly with: cd /opt/llama.cpp-rocm-780m && ./scripts/start.sh
+    # Stop with:                    ./scripts/stop.sh
+    restart: "no"
     init: false
     # Persist build cache: a new docker build (e.g. after `git pull`
     # in /opt/llama.cpp) reuses the CMake configuration and only
@@ -34,7 +37,6 @@ services:
       - /opt/models:/models:ro
       - /opt/llama.cpp-rocm-780m/logs:/var/log/llama-server
     devices:
-      - /dev/kfd
       - /dev/dri
     group_add:
       - "44"   # video (gid)
@@ -71,6 +73,7 @@ services:
       - --cache-type-v
       - q8_0
       - --flash-attn
+      - auto
       - --jinja
     ports:
       - "8082:8080"   # 8082 to avoid conflict with dreamline RAG on 8081
