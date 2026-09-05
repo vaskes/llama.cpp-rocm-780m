@@ -20,7 +20,8 @@
 #
 # Container name: llama-ornith
 # Image:          llama.cpp-rocm-780m:7.13
-# Host port:      8083  (avoid 8082=Qwen, 8081=dreamline, 8888=searxng)
+# Host port:      8080  (same as Qwen — they never run at the same time.
+#                          Override with LLAMA_ORNITH_HOST_PORT if needed.)
 # Container port: 8080
 # GPU:            /dev/dri only (NOT /dev/kfd — see OPERATIONS.md)
 
@@ -28,7 +29,7 @@ set -e
 
 CONTAINER_NAME="llama-ornith"
 IMAGE="llama.cpp-rocm-780m:7.13"
-HOST_PORT="${LLAMA_ORNITH_HOST_PORT:-8083}"
+HOST_PORT="${LLAMA_ORNITH_HOST_PORT:-8080}"
 CONTAINER_PORT=8080
 
 MODELS_DIR_HOST="/opt/models"

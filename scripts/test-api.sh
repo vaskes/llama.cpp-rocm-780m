@@ -3,7 +3,7 @@
 # Usage: ./scripts/test-api.sh [prompt]
 set -e
 PROMPT="${1:-Say hi in 5 words.}"
-HOST="${LLAMA_HOST:-http://127.0.0.1:8082}"
+HOST="${LLAMA_HOST:-http://127.0.0.1:8080}"
 
 echo "→ $HOST/v1/models:"
 curl -s "$HOST/v1/models" | head -c 500

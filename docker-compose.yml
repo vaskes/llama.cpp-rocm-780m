@@ -76,7 +76,9 @@ services:
       - auto
       - --jinja
     ports:
-      - "8082:8080"   # 8082 to avoid conflict with dreamline RAG on 8081
+      - "8080:8080"   # host 8080 -> container 8080. Safe because Qwen and Ornith
+                      # are never running at the same time (both ~40GB RAM).
+                      # (8081 = dreamline, 8888 = searxng — don't touch those.)
     healthcheck:
       test: ["CMD", "/opt/llama.cpp/build/bin/llama-server", "--help"]
       interval: 30s
